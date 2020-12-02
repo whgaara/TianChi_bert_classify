@@ -7,17 +7,22 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 from bert.data.classify_dataset import *
 from bert.layers.BertClassify import BertClassify
+from pytorch_pretrained_bert import BertForSequenceClassification, BertConfig
 
 
 if __name__ == '__main__':
     onehot_type = False
     labelcount = int(open(Assistant, 'r', encoding='utf-8').readline().split(',')[1])
-    bert = BertClassify(kinds_num=labelcount).to(device)
+    # bert = BertClassify(kinds_num=labelcount).to(device)
+
+    bert_config = BertConfig(vocab_size_or_config_json_file=VocabSize, hidden_size=768,
+               num_hidden_layers=12, num_attention_heads=12, intermediate_size=3072)
+    bert = BertForSequenceClassification(bert_config, num_labels=labelcount).to(device)
 
     # testset = BertTestSetHead512(EvalPath)
     # dataset = BertDataSetHead512(CorpusPath)
-    testset = BertTestSetHead512(EDemoPath)
-    dataset = BertDataSetHead512(TDemoPath)
+    testset = BertTestSetHeadTfidf(EDemoPath, TfidfDictPath)
+    dataset = BertDataSetHeadTfidf(TDemoPath, TfidfDictPath)
     dataloader = DataLoader(dataset=dataset, batch_size=BatchSize, shuffle=True, drop_last=False)
 
     optim = Adam(bert.parameters(), lr=LearningRate)

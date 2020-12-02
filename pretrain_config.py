@@ -11,6 +11,7 @@ TDemoPath = 'data/train_data/train_demo.csv'
 EvalPath = 'data/test_data/eval_set.csv'
 EDemoPath = 'data/test_data/eval_demo.csv'
 TestPath = 'data/test_data/test_a.csv'
+TfidfDictPath = 'data/train_data/tfidfdict.pickle'
 
 # 保存最大句长，字符数，类别数
 Assistant = 'data/train_data/assistant.txt'

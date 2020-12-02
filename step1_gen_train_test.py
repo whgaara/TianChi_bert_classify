@@ -88,7 +88,7 @@ class PretrainProcess(object):
             for item in items:
                 item = [str(x) for x in item]
                 self.f_train.write(str(label) + ',' + ' '.join(item) + '\n')
-                if random.random() < 0.01:
+                if random.random() < 0.1:
                     self.f_tdemo.write(str(label) + ',' + ' '.join(item) + '\n')
         for label, items in self.eval_data_set.items():
             for item in items:

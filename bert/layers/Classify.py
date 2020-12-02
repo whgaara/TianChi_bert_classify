@@ -7,5 +7,5 @@ class Classify(nn.Module):
         self.mlm_dense = nn.Linear(hidden_size, classify)
 
     def forward(self, feedforward_x):
-        classify_info = self.mlm_dense(feedforward_x[:, 0:1, :].squeeze(1))
+        classify_info = self.mlm_dense(feedforward_x[:, 0, :].squeeze(1))
         return classify_info

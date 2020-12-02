@@ -64,29 +64,6 @@ class BertClassify(nn.Module):
             attention_masks.append(attention_mask.tolist())
         return torch.tensor(attention_masks)
 
-    # def load_pretrain(self, sen_length, path=PretrainPath):
-    #     pretrain_model_dict = torch.load(path)
-    #
-    #     if sen_length == 512:
-    #         finetune_model_dict = self.state_dict()
-    #         new_parameter_dict = {}
-    #         # 加载embedding层参数
-    #         for key in local2target_emb:
-    #             local = key
-    #             target = local2target_emb[key]
-    #             new_parameter_dict[local] = pretrain_model_dict[target]
-    #         # 加载transformerblock层参数
-    #         for i in range(self.num_hidden_layers):
-    #             for key in local2target_transformer:
-    #                 local = key % i
-    #                 target = local2target_transformer[key] % i
-    #                 new_parameter_dict[local] = pretrain_model_dict[target]
-    #         finetune_model_dict.update(new_parameter_dict)
-    #     else:
-    #         finetune_model_dict = pretrain_model_dict.state_dict()
-    #
-    #     self.load_state_dict(finetune_model_dict)
-
     def forward(self, input_token, segment_ids):
         # embedding
         # embedding_x = self.roberta_emb(input_token) + self.position_emb()
@@ -102,6 +79,6 @@ class BertClassify(nn.Module):
                 feedforward_x = self.transformer_blocks[i](embedding_x, attention_mask)
             else:
                 feedforward_x = self.transformer_blocks[i](feedforward_x, attention_mask)
-        # mlm
+        # classify
         output = self.classify(feedforward_x)
         return output

@@ -18,11 +18,11 @@ Assistant = 'data/train_data/assistant.txt'
 
 # ## 训练调试参数开始 ## #
 Epochs = 16
-BatchSize = 2
+BatchSize = 16
 LearningRate = 1e-4
 AttentionMask = False
 HiddenLayerNum = 2
-SentenceLength = 1024
+SentenceLength = 256
 PretrainPath = 'checkpoint/finetune/bert_classify_%s.model' % SentenceLength
 # ## 训练调试参数结束 ## #
 
@@ -33,7 +33,7 @@ try:
 except:
     VocabSize = 0
 HiddenSize = 768
-IntermediateSize = 3072
+IntermediateSize = 1024
 AttentionHeadNum = 12
 
 

@@ -18,12 +18,10 @@ if __name__ == '__main__':
     # bert_config = BertConfig(vocab_size_or_config_json_file=VocabSize, hidden_size=768, num_hidden_layers=12, num_attention_heads=12, intermediate_size=3072)
     # bert = BertForSequenceClassification(bert_config, num_labels=labelcount).to(device)
 
-    # testset = BertTestSetHead512(EvalPath)
-    # dataset = BertDataSetHead512(CorpusPath)
-    testset = BertTestSetHead512(EDemoPath)
-    dataset = BertDataSetHead512(TDemoPath)
-    # testset = BertTestSetHeadTfidf(EDemoPath, TfidfDictPath)
-    # dataset = BertDataSetHeadTfidf(TDemoPath, TfidfDictPath)
+    testset = BertTestSetHead512(EvalPath)
+    dataset = BertDataSetHead512(CorpusPath)
+    # testset = BertTestSetHead512(EDemoPath)
+    # dataset = BertDataSetHead512(TDemoPath)
     dataloader = DataLoader(dataset=dataset, batch_size=BatchSize, shuffle=True, drop_last=False)
 
     optim = Adam(bert.parameters(), lr=LearningRate)
@@ -73,8 +71,6 @@ if __name__ == '__main__':
                 # 累计数值
                 if label == output_topk[0]:
                     accuracy_count += 1
-                else:
-                    print(label, output_topk)
 
             if test_count:
                 acc_rate = float(accuracy_count) / float(test_count)

@@ -21,8 +21,8 @@ Epochs = 16
 BatchSize = 2
 LearningRate = 1e-4
 AttentionMask = False
-HiddenLayerNum = 12
-SentenceLength = 512
+HiddenLayerNum = 2
+SentenceLength = 1024
 PretrainPath = 'checkpoint/finetune/bert_classify_%s.model' % SentenceLength
 # ## 训练调试参数结束 ## #
 

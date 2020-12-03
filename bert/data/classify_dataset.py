@@ -53,7 +53,7 @@ class BertDataSetHead512(Dataset):
                     line = line.split(',')
                     if line[0] and line[1]:
                         self.labels.append(int(line[0]))
-                        self.descriptions.append(line[1].split(' ')[:511])
+                        self.descriptions.append(line[1].split(' ')[:SentenceLength-1])
 
     def __len__(self):
         return len(self.descriptions)
@@ -86,7 +86,7 @@ class BertTestSetHead512(Dataset):
                     line = line.split(',')
                     if line[0] and line[1]:
                         self.labels.append(int(line[0]))
-                        self.descriptions.append(line[1].split(' ')[:511])
+                        self.descriptions.append(line[1].split(' ')[:SentenceLength-1])
 
     def __len__(self):
         return len(self.descriptions)
@@ -134,7 +134,7 @@ class BertDataSetHeadTfidf(Dataset):
         for token in token_text:
             if int(token) not in self.tfidfdict:
                 continue
-            if self.tfidfdict[int(token)] > 0.05:
+            if self.tfidfdict[int(token)] > 0.5:
                 tokens_id.append(int(token))
             if len(tokens_id) == 512:
                 break
@@ -176,7 +176,7 @@ class BertTestSetHeadTfidf(Dataset):
         for token in token_text:
             if int(token) not in self.tfidfdict:
                 continue
-            if self.tfidfdict[int(token)] > 0.05:
+            if self.tfidfdict[int(token)] > 0.5:
                 tokens_id.append(int(token))
             if len(tokens_id) == 512:
                 break

@@ -14,21 +14,18 @@ class FGM(object):
         self.model = model
         self.backup = {}
 
-    def attack(self, epsilon=0.25, emb_name='token_emb.token_embeddings.weight'):
+    def attack(self, emb_g, epsilon=0.25, emb_name='token_emb.token_embeddings.weight'):
         # emb_name这个参数要换成你模型中embedding的参数名
         for name, param in self.model.named_parameters():
             if param.requires_grad and emb_name in name:
                 self.backup[name] = param.data.clone()
-                try:
-                    norm = torch.norm(param.grad)
-                except:
-                    x = 1
-                    continue
+                # norm = torch.norm(param.grad)
+                norm = torch.norm(emb_g)
                 if norm != 0 and not torch.isnan(norm):
                     r_at = epsilon * param.grad / norm
                     param.data.add_(r_at)
 
-    def restore(self, emb_name='token_emb'):
+    def restore(self, emb_name='token_emb.token_embeddings.weight'):
         # emb_name这个参数要换成你模型中embedding的参数名
         for name, param in self.model.named_parameters():
             if param.requires_grad and emb_name in name:
@@ -66,11 +63,18 @@ if __name__ == '__main__':
 
             # 正常训练
             output = bert(input_token, segment_ids)
+
+            # 此处是第一处的计算代码，是为了生成计算图，这里省略了
+            emb_g = None
+            def extract(g):
+                global emb_g
+                emb_g = g
             mask_loss = criterion(output, label)
+            bert.token_emb.token_embeddings.weight.register_hook(extract)
             mask_loss.backward()
 
             # 对抗训练，反向传播，并在正常的grad基础上，累加对抗训练的梯度
-            fgm.attack()  # 在embedding上添加对抗扰动
+            fgm.attack(emb_g)  # 在embedding上添加对抗扰动
             fgm_output = fgm.model(input_token, segment_ids)
             mask_loss = criterion(fgm_output, label)
             print_loss = mask_loss.item()

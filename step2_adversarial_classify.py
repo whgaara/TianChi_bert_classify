@@ -7,19 +7,42 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 from bert.data.classify_dataset import *
 from bert.layers.BertClassify import BertClassify
-from pytorch_pretrained_bert import BertForSequenceClassification, BertConfig
+
+
+class FGM(object):
+    def __init__(self, model):
+        self.model = model
+        self.backup = {}
+
+    def attack(self, epsilon=0.25, emb_name='token_emb.token_embeddings.weight'):
+        # emb_name这个参数要换成你模型中embedding的参数名
+        for name, param in self.model.named_parameters():
+            if param.requires_grad and emb_name in name:
+                self.backup[name] = param.data.clone()
+                try:
+                    norm = torch.norm(param.grad)
+                except:
+                    x = 1
+                    continue
+                if norm != 0 and not torch.isnan(norm):
+                    r_at = epsilon * param.grad / norm
+                    param.data.add_(r_at)
+
+    def restore(self, emb_name='token_emb'):
+        # emb_name这个参数要换成你模型中embedding的参数名
+        for name, param in self.model.named_parameters():
+            if param.requires_grad and emb_name in name:
+                assert name in self.backup
+                param.data = self.backup[name]
+        self.backup = {}
 
 
 if __name__ == '__main__':
     onehot_type = False
     labelcount = int(open(Assistant, 'r', encoding='utf-8').readline().split(',')[1])
     bert = BertClassify(kinds_num=labelcount).to(device)
+    fgm = FGM(bert)
 
-    # bert_config = BertConfig(vocab_size_or_config_json_file=VocabSize, hidden_size=768, num_hidden_layers=12, num_attention_heads=12, intermediate_size=3072)
-    # bert = BertForSequenceClassification(bert_config, num_labels=labelcount).to(device)
-
-    # testset = BertTestSetHead512(EvalPath)
-    # dataset = BertDataSetHead512(CorpusPath)
     testset = BertTestSetHead512(EDemoPath)
     dataset = BertDataSetHead512(TDemoPath)
     dataloader = DataLoader(dataset=dataset, batch_size=BatchSize, shuffle=True, drop_last=False)
@@ -40,9 +63,19 @@ if __name__ == '__main__':
             input_token = data['input_token_ids']
             segment_ids = data['segment_ids']
             label = data['token_ids_labels']
+
+            # 正常训练
             output = bert(input_token, segment_ids)
             mask_loss = criterion(output, label)
+            mask_loss.backward()
+
+            # 对抗训练，反向传播，并在正常的grad基础上，累加对抗训练的梯度
+            fgm.attack()  # 在embedding上添加对抗扰动
+            fgm_output = fgm.model(input_token, segment_ids)
+            mask_loss = criterion(fgm_output, label)
             print_loss = mask_loss.item()
+            fgm.restore()  # 恢复embedding参数
+
             optim.zero_grad()
             mask_loss.backward()
             optim.step()

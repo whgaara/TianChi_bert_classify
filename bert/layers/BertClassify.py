@@ -29,9 +29,9 @@ class BertClassify(nn.Module):
         self.intermediate_size = intermediate_size
 
         # 申明网络
-        # self.roberta_emb = TokenEmbedding()
-        # self.position_emb = PositionEmbedding()
-        self.bert_emb = BertEmbeddings(vocab_size=self.vocab_size, max_len=self.max_len, hidden_size=self.hidden_size)
+        self.token_emb = TokenEmbedding()
+        self.position_emb = PositionEmbedding()
+        # self.bert_emb = BertEmbeddings(vocab_size=self.vocab_size, max_len=self.max_len, hidden_size=self.hidden_size)
         self.transformer_blocks = nn.ModuleList(
             Transformer(
                 hidden_size=self.hidden_size,
@@ -66,8 +66,8 @@ class BertClassify(nn.Module):
 
     def forward(self, input_token, segment_ids):
         # embedding
-        # embedding_x = self.roberta_emb(input_token) + self.position_emb()
-        embedding_x = self.bert_emb(input_token)
+        embedding_x = self.token_emb(input_token) + self.position_emb()
+        # embedding_x = self.bert_emb(input_token)
         if AttentionMask:
             attention_mask = self.gen_attention_masks(segment_ids).to(device)
         else:

@@ -19,7 +19,6 @@ class FGM(object):
         for name, param in self.model.named_parameters():
             if param.requires_grad and emb_name in name:
                 self.backup[name] = param.data.clone()
-                # norm = torch.norm(param.grad)
                 norm = torch.norm(emb_g)
                 if norm != 0 and not torch.isnan(norm):
                     r_at = epsilon * param.grad / norm
@@ -63,8 +62,6 @@ if __name__ == '__main__':
 
             # 正常训练
             output = bert(input_token, segment_ids)
-
-            # 此处是第一处的计算代码，是为了生成计算图，这里省略了
             emb_g = None
             def extract(g):
                 global emb_g
@@ -79,10 +76,10 @@ if __name__ == '__main__':
             mask_loss = criterion(fgm_output, label)
             print_loss = mask_loss.item()
             fgm.restore()  # 恢复embedding参数
-
             optim.zero_grad()
             mask_loss.backward()
             optim.step()
+
         print('EP_%d mask loss:%s' % (epoch, print_loss))
 
         # save

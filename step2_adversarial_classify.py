@@ -76,9 +76,9 @@ if __name__ == '__main__':
             mask_loss = criterion(fgm_output, label)
             print_loss = mask_loss.item()
             fgm.restore()  # 恢复embedding参数
-            optim.zero_grad()
             mask_loss.backward()
             optim.step()
+            optim.zero_grad()
 
         print('EP_%d mask loss:%s' % (epoch, print_loss))
 
